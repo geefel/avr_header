@@ -1,0 +1,66 @@
+infoTouch xpt2046:
+
+init:
+pinMode(TP_CS_PIN, OUTPUT)
+digitalWrite(TP_CS_PIN, HIGH)
+pinMode(TP_IRQ_PIN, INPUT);
+digitalWrite(TP_IRQ_PIN, HIGH);
+
+read immer 8 bit Befehl und 8 bit für clock,
+read_x_y
+	*phwXpos = xpt2046_read_average(0xD0);	//0xD0 Befehl für x-Achxe
+	*phwYpos = xpt2046_read_average(0x90);	//0x90 Befehl für y-Achse
+Z1 0xB1
+Z2 0xC1
+X  0x91
+Y  0xD1
+y-PowerDown 0xD0
+
+#define READ_TIMES  5
+#define LOST_NUM    1
+    uint16_t xpt2046_read_average(uint8_t chCmd)
+    {
+        uint8_t i, j;
+        uint16_t hwbuffer[READ_TIMES], hwSum = 0, hwTemp;
+
+        for (i = 0; i < READ_TIMES; i ++) {
+            hwbuffer[i] = xpt2046_read_ad_value(chCmd);	//*1
+        }
+        for (i = 0; i < READ_TIMES - 1; i ++) {
+            for (j = i + 1; j < READ_TIMES; j ++) {
+                if (hwbuffer[i] > hwbuffer[j]) {
+                    hwTemp = hwbuffer[i];
+                    hwbuffer[i] = hwbuffer[j];
+                    hwbuffer[j] = hwTemp;
+                }
+            }
+        }
+        for (i = LOST_NUM; i < READ_TIMES - LOST_NUM; i ++) {
+            hwSum += hwbuffer[i];
+        }
+        hwTemp = hwSum / (READ_TIMES - 2 * LOST_NUM);
+
+        return hwTemp;
+    }
+_______________________________________________________________
+*1 
+uint16_t xpt2046_read_ad_value(uint8_t chCmd)
+    {
+        uint16_t hwData = 0;
+    
+        __XPT2046_CS_CLR();
+        xpt2046_write_byte(chCmd);	//*2
+        hwData = xpt2046_write_byte(0x00);	//Daten holen (sieht nach 12 bit aus)
+        hwData <<= 8;
+        hwData |= xpt2046_write_byte(0x00);
+        hwData >>= 4;
+       __XPT2046_CS_SET();
+        
+        return hwData;
+    }
+_______________________________________________________________
+*2
+xpt2046_write_byte(chCmd) 
+	{
+		SPI.transfer(chCmd);
+	}

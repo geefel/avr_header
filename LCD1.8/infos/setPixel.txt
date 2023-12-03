@@ -1,0 +1,65 @@
+8.12 Address Control
+The address counter sets the addresses of the display data RAM for writing and reading.
+Data is written pixel-wise into the RAM matrix of DRIVER. The data for one pixel or two pixels is collected
+(RGB 6-6-6-bit), according to the data formats. As soon as this pixel-data information is complete the “Write
+access” is activated on the RAM. The locations of RAM are addressed by the address pointers. The address
+ranges are X=0 to X=239 (Efh) and Y=0 to Y=319 (13Fh). Addresses outside these ranges are not allowed.
+Before writing to the RAM, a window must be defined that will be written. The window is programmable via
+the command registers XS, YS designating the start address and XE, YE designating the end address.
+For example the whole display contents will be written, the window is defined by the following values:
+XS=0 (0h) YS=0 (0h) and XE=239 (Efh), YE=319 (13Fh).
+
+    @brief  Draw a single pixel to the display at requested coordinates.
+            Self-contained and provides its own transaction as needed
+            (see writePixel(x,y,color) for a lower-level variant).
+            Edge clipping is performed here.
+    @param  x      Horizontal position (0 = left).
+    @param  y      Vertical position   (0 = top).
+    @param  color  16-bit pixel color in '565' RGB format.
+*/
+void Adafruit_SPITFT::drawPixel(int16_t x, int16_t y, uint16_t color) {
+  // Clip first...
+  if ((x >= 0) && (x < _width) && (y >= 0) && (y < _height)) {
+    // THEN set up transaction (if needed) and draw...
+    startWrite();
+    setAddrWindow(x, y, 1, 1);
+    SPI_WRITE16(color);
+    endWrite();
+  }
+}
+
+  /*!
+      @brief  Set up the specific display hardware's "address window"
+              for subsequent pixel-pushing operations.
+      @param  x  Leftmost pixel of area to be drawn (MUST be within
+                 display bounds at current rotation setting).
+      @param  y  Topmost pixel of area to be drawn (MUST be within
+                 display bounds at current rotation setting).
+      @param  w  Width of area to be drawn, in pixels (MUST be >0 and,
+                 added to x, within display bounds at current rotation).
+      @param  h  Height of area to be drawn, in pixels (MUST be >0 and,
+                 added to x, within display bounds at current rotation).
+  */
+  virtual void setAddrWindow(uint16_t x, uint16_t y, uint16_t w,
+                             uint16_t h) = 0;
+
+/*!
+    @brief   Set the "address window" - the rectangle we will write to RAM with
+   the next chunk of      SPI data writes. The ILI9341 will automatically wrap
+   the data as each row is filled
+    @param   x1  TFT memory 'x' origin
+    @param   y1  TFT memory 'y' origin
+    @param   w   Width of rectangle
+    @param   h   Height of rectangle
+*/
+void Adafruit_ILI9341::setAddrWindow(uint16_t x1, uint16_t y1, uint16_t w,
+                                     uint16_t h) {
+  uint16_t x2 = (x1 + w - 1), y2 = (y1 + h - 1);
+  writeCommand(ILI9341_CASET); // Column address set
+  SPI_WRITE16(x1);
+  SPI_WRITE16(x2);
+  writeCommand(ILI9341_PASET); // Row address set
+  SPI_WRITE16(y1);
+  SPI_WRITE16(y2);
+  writeCommand(ILI9341_RAMWR); // Write to RAM
+}
