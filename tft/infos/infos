@@ -1,0 +1,181 @@
+PB6 SCK			13
+PB4 MISO		12
+PB3 MOSI		11
+PB2 LCD-CS	10
+PB1 LCD_BL 	9
+
+PD7 LCD-DC	7
+
+PD5 SD-CS		5
+PD4 TP-CS		4
+PD3 TP-IRQ	3
+
+************************************************************************
+//Die Register des TFTs
+//~ #define NOP 0x00     ///< No-op register
+//~ #define SWRESET 0x01 ///< Software reset register
+//~ #define RDDID 0x04   ///< Read display identification information
+//~ #define RDDST 0x09   ///< Read Display Status
+
+//~ #define SLPIN 0x10  ///< Enter Sleep Mode
+//~ #define SLPOUT 0x11 ///< Sleep Out
+//~ #define PTLON 0x12  ///< Partial Mode ON
+//~ #define NORON 0x13  ///< Normal Display Mode ON
+
+//~ #define RDMODE 0x0A     ///< Read Display Power Mode
+//~ #define RDMADCTL 0x0B   ///< Read Display MADCTL
+//~ #define RDPIXFMT 0x0C   ///< Read Display Pixel Format
+//~ #define RDIMGFMT 0x0D   ///< Read Display Image Format
+//~ #define RDSELFDIAG 0x0F ///< Read Display Self-Diagnostic Result
+
+//~ #define INVOFF 0x20   ///< Display Inversion OFF
+//~ #define INVON 0x21    ///< Display Inversion ON
+//~ #define GAMMASET 0x26 ///< Gamma Set
+//~ #define DISPOFF 0x28  ///< Display OFF
+//~ #define DISPON 0x29   ///< Display ON
+
+#define CASET 0x2A ///< Column Address Set
+#define PASET 0x2B ///< Page Address Set
+#define RAMWR 0x2C ///< Memory Write
+#define RAMRD 0x2E ///< Memory Read
+
+//~ #define PTLAR 0x30    ///< Partial Area
+//~ #define VSCRDEF 0x33  ///< Vertical Scrolling Definition
+//~ #define MADCTL 0x36   ///< Memory Access Control
+//~ #define VSCRSADD 0x37 ///< Vertical Scrolling Start Address
+//~ #define PIXFMT 0x3A   ///< COLMOD: Pixel Format Set
+
+//~ #define FRMCTR1 0xB1 ///< Frame Rate Control (In Normal Mode/Full Colors)
+//~ #define FRMCTR2 0xB2 ///< Frame Rate Control (In Idle Mode/8 colors)
+//~ #define FRMCTR3 0xB3 ///< Frame Rate control (In Partial Mode/Full Colors)
+//~ #define INVCTR 0xB4  ///< Display Inversion Control
+//~ #define DFUNCTR 0xB6 ///< Display Function Control
+
+//~ #define PWCTR1 0xC0 ///< Power Control 1
+//~ #define PWCTR2 0xC1 ///< Power Control 2
+//~ #define PWCTR3 0xC2 ///< Power Control 3
+//~ #define PWCTR4 0xC3 ///< Power Control 4
+//~ #define PWCTR5 0xC4 ///< Power Control 5
+//~ #define VMCTR1 0xC5 ///< VCOM Control 1
+//~ #define VMCTR2 0xC7 ///< VCOM Control 2
+
+//~ #define RDID1 0xDA ///< Read ID 1
+//~ #define RDID2 0xDB ///< Read ID 2
+//~ #define RDID3 0xDC ///< Read ID 3
+//~ #define RDID4 0xDD ///< Read ID 4
+
+//~ #define GMCTRP1 0xE0 ///< Positive Gamma Correction
+//~ #define GMCTRN1 0xE1 ///< Negative Gamma Correction
+//#define PWCTR6     0xFC
+
+***********************************************************
+Komentiere Sachen scheinen nicht gebraucht zu werden
+	//send_LCD_Command_Data(isCommand, 0x10);	//<Sleep in
+	send_LCD_Command_Data(isCommand, 0x11);	//<Sleep out
+	//send_LCD_Command_Data(isCommand, 0x28); //Display off
+	send_LCD_Command_Data(isCommand, 0x29);	//Display on
+	send_LCD_Register(0x3a, 0x55);	//< COLMOD: Pixel Format Set
+	
+	//Memory Access Control MADCTE
+	D7 MY Page Address Order: 0 = Top to Botton, 1 = umgekehrt
+	D6 MX Column Address Order: 0 Left to Right, 1 = umgekehrt
+	D5 MV Page/Column Order: 0 = normal, 1 = revers
+	D4 ML Line Address Order: 0 = Refresh top to Bottom,1 = umgekehrt
+	D3 RGB RGB/BGR Order: 0 = RGB,1 = BGR
+	D2 MH Display Data Latch Order: 0 = Refresh Left to Right, 1 = umgekehrt
+	MY MX MV 
+	0  0  0  normal				
+	0  1  1  90° drehen
+	1  1  0  180° drehen
+	1  0  1  270° drehen
+	
+	send_LCD_Register(0x36, 0x0);		///< Memory Access Control
+	
+	send_LCD_Register(0x3a, 0x55);	///< COLMOD: Pixel Format Set
+	//send_LCD_Command_Data(isCommand, 0xb2);	///< Frame Rate Control (In Idle Mode/8 colors)???
+	//send_LCD_Command_Data(isData, 0x0c);
+	//send_LCD_Command_Data(isData, 0x0c);
+	//send_LCD_Command_Data(isData, 0x00);
+	//send_LCD_Command_Data(isData, 0x33);
+	//send_LCD_Command_Data(isData, 0x33);
+	//send_LCD_Register(0xb7,0x35);
+	//~ send_LCD_Register(0xbb,0x28);
+	send_LCD_Register(0xc0,0x3c);	///< Power Control 1
+	send_LCD_Register(0xc2,0x01);	///< Power Control 3
+	//send_LCD_Register(0xc3,0x0b);
+	//send_LCD_Register(0xc4,0x20);
+	//send_LCD_Register(0xc6,0x0f);	///<Frame Rate Control in Normal Mode, def 60 Hz
+	//send_LCD_Command_Data(isCommand, 0xD0);
+	//send_LCD_Command_Data(isData, 0xa4);
+	//send_LCD_Command_Data(isData, 0xa1);
+	/*send_LCD_Command_Data(isCommand, 0xe0);
+	send_LCD_Command_Data(isData, 0xd0);
+	send_LCD_Command_Data(isData, 0x01);
+	send_LCD_Command_Data(isData, 0x08);
+	send_LCD_Command_Data(isData, 0x0f);
+	send_LCD_Command_Data(isData, 0x11);
+	send_LCD_Command_Data(isData, 0x2a);
+	send_LCD_Command_Data(isData, 0x36);
+	send_LCD_Command_Data(isData, 0x55);
+	send_LCD_Command_Data(isData, 0x44);
+	send_LCD_Command_Data(isData, 0x3a);
+	send_LCD_Command_Data(isData, 0x0b);
+	send_LCD_Command_Data(isData, 0x06);
+	send_LCD_Command_Data(isData, 0x11);
+	send_LCD_Command_Data(isData, 0x20);
+	send_LCD_Command_Data(isCommand, 0xe1);
+	send_LCD_Command_Data(isData, 0xd0);
+	send_LCD_Command_Data(isData, 0x02);
+	send_LCD_Command_Data(isData, 0x07);
+	send_LCD_Command_Data(isData, 0x0a);
+	send_LCD_Command_Data(isData, 0x0b);
+	send_LCD_Command_Data(isData, 0x18);
+	send_LCD_Command_Data(isData, 0x34);
+	send_LCD_Command_Data(isData, 0x43);
+	send_LCD_Command_Data(isData, 0x4a);
+	send_LCD_Command_Data(isData, 0x2b);
+	send_LCD_Command_Data(isData, 0x1b);
+	send_LCD_Command_Data(isData, 0x1c);
+	send_LCD_Command_Data(isData, 0x22);
+	send_LCD_Command_Data(isData, 0x1f);*/
+	//send_LCD_Register(0x55,0xB0);		
+
+*************************************************************
+
+void deb();
+
+//****DEBUG mit Backlight****
+void deb() {
+	static uint8_t count = 0;
+	if (count == 0) {
+		set_LCD_BL(high);
+		++count;
+	}
+}
+	
+*************************************************************
+
+#ifndef KREISE_H
+#define KREISE_H
+
+	uint8_t dim1 = 3;
+	uint16_t data1[] = {0x4000, 0xE000, 0x4000};
+	uint8_t dim2 = 4;
+	uint16_t data2[] = {0x6000, 0xF000, 0xF000, 0x6000};
+	uint8_t dim3 = 5;
+	uint16_t data3[] = {0x7000, 0xF800, 0xF800, 0xF800, 0x7000};
+	uint8_t dim4 = 7;
+	uint16_t data4[] = {0x3800, 0x7C00, 0xFE00, 0xFE00, 0xFE00, 0x7C00, 0x3800};
+	uint8_t dim5 = 9;
+	uint16_t data5[] = {0x1C00, 0x3E00, 0x7F00, 0xFF80, 0xFF80, 0xFF80, 0x7F00, 0x3E00, 0x1C00};
+	uint8_t dim6 = 11;
+	uint16_t data6[] = {0x1F00, 0x3F80, 0x7FC0, 0xFFE0, 0xFFE0, 0xFFE0, 0xFFE0, 0xFFE0, 0x7FC0, 
+		0x3F80, 0x1F00};
+	uint8_t dim7 = 13;
+	uint16_t data7[] = {0xF80, 0x1FC0, 0x3FE0, 0x7FF0, 0xFFF8, 0xFFF8, 0xFFF8, 0xFFF8, 0xFFF8, 
+		0x7FF0, 0x1FC0, 0xF80};
+	uint8_t dim8 = 15;
+	uint16_t data8[] = {0x7C0, 0x1FF0, 0x3FF8, 0x7FFC, 0xFFFC, 0xFFFE, 0xFFFE, 0xFFFE, 0xFFFE, 0xFFFE, 
+		0x7FFC, 0x7FFC, 0xFF8, 0x1FF0, 0x7C0};
+
+#endif	//KREISE_H

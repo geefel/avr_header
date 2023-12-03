@@ -1,0 +1,29 @@
+uint32_t dividieren32(uint32_t *z, uint32_t m) {
+	uint32_t count = 0;
+	if(*z > m) {		
+		do {
+			count++;
+		} while((*z -= m) >= m);
+	}
+	return count;
+}
+
+uint16_t dividieren16(uint16_t *z, uint16_t m) {
+	uint16_t count = 0;
+	if(*z > m) {		
+		do {
+			count++;
+		} while((*z -= m) >= m);
+	}
+	return count;
+}
+
+uint8_t dividieren8(uint8_t *z, uint8_t m) {
+	uint8_t count = 0;
+	if(*z > m) {		
+		do {
+			count++;
+		} while((*z -= m) >= m);
+	}
+	return count;
+}
