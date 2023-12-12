@@ -1,4 +1,4 @@
-SRCS=main.c ir.c uart_hard.c
+SRCS=main.c ir_Samsung32.c uart_hard.c
 TARGET=IR_ATmega
 
 #ATmega48A/PA/88A/PA/168A/PA/328/P

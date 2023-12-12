@@ -1,6 +1,6 @@
 #include "uart_hard.h"
 
-void initUartHW(uint16_t baud) {
+void initUartHW(uint32_t baud) {
 	uint16_t ubrr = (uint16_t)(F_CPU/16.0/baud-0.5);
 	/* Baudrate setzen */
   UBRR0 = ubrr;
