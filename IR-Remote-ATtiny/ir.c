@@ -59,6 +59,11 @@
 static volatile uint16_t ti = 0;
 static volatile uint8_t newIR = 0;
 static volatile uint8_t repeatData = 0;
+static volatile uint8_t maske = 1;
+static volatile uint8_t bitA = 0;
+static volatile uint8_t bitB = 0;
+static volatile uint8_t t = 0;
+static volatile uint8_t status = ENDE_IR;
 
 union {
 	uint8_t ergAr[4];
@@ -137,16 +142,13 @@ ISR(TIMER0_COMPA_vect){
 }
 
 ISR(INT0_vect){
-	static uint8_t maske = 1;
-	static uint8_t bitA = 0;
-	static uint8_t bitB = 0;
-	static uint16_t t = 0;
-	static uint8_t status = ENDE_IR;
 	switch (status) {
 		
 		case ENDE_IR:
 			startTimer0();
 			ti = 0;
+			bitA = 0; 
+			bitB = 0;
 			status = BIT_IR;
 			break;
 			

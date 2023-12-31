@@ -34,25 +34,24 @@
 
 #include <avr/interrupt.h>
 #include <avr/io.h>
-#include "ir.h"
+#include "ir_Samsung32.h"
 #include "uart_hard.h"
 
-#define ENDE_IR		0
-#define BIT_IR 		1
+#define ENDE_IR			0
+#define BIT_IR 			1
 #define BIT_START 	2
 
-#define LAENGE_START 				163
+#define LAENGE_START 						163
 #define LAENGE_WIEDERHOLUNG 		204
 #define IF_START_WIEDERHOLUNG 	LAENGE_START + LAENGE_WIEDERHOLUNG / 2
 
 #define LAENGE_BIT_1 		39
 #define LAENGE_BIT_0 		20
-#define IF_BIT_1_BIT_0 	LAENGE_BIT_1 + LAENGE_BIT_0 / 2
+#define IF_BIT_1_BIT_0 	30	//LAENGE_BIT_1 + LAENGE_BIT_0 / 2
 
 static volatile uint16_t ti = 0;
 static volatile uint8_t newIR = 0;
 static volatile uint8_t repeatData = 0;
-
 
 union {
 	uint8_t ergAr[4];
@@ -127,24 +126,14 @@ uint8_t getRepeatData() {
 ISR(TIMER0_COMPA_vect){
 	ti++;
 }
-/*
- * Bei fallender Flanke und ATmega, 16000000Hz, Prescale 1, OCR0A = 13, 112,38 µs
- * Start-bit: 13,7ms	Count 244
- * 0-bit: 		1,15ms	Count 20
- * 1-bit: 		2,3ms		Count 40
- * stop: 			x ms
- * 
- * Wiederholung
- * Start-bit: 11,4ms	Count 204
- * Stop: 			96,8m		Count 1732
- */
+
 ISR(INT0_vect){
 	static uint8_t maske = 1;
 	static uint8_t bitA = 0;
 	static uint8_t bitB = 0;
 	static uint8_t t = 0;
 	static uint8_t status = ENDE_IR;
-	
+
 	switch (status) {
 		
 		case ENDE_IR:
@@ -164,19 +153,19 @@ ISR(INT0_vect){
 			//~ }
 			break;
 									
-		case BIT_START:			//zweites Bit beginnt hier
-			t = ti;				//Auswertung des ersten Bit
+		case BIT_START:							//zweites Bit beginnt hier
+			t = ti;										//Auswertung des ersten Bit
 			ti = 0;
-			if (t > IF_BIT_1_BIT_0)				//40 für log 1 und 20 für log 0
+			if (t > IF_BIT_1_BIT_0)		//40 für log 1 und 20 für log 0
 				data.ergAr[bitB] |= maske;
 			maske <<= 1;
 			bitA++;
-			if (bitA == 8) {	//data.ergAr[0,1,2] ist voll
+			if (bitA == 8) {					//data.ergAr[0,1,2] ist voll
 				maske = 1;
 				bitA = 0;
 				bitB++;
 			}
-			if (bitB == 4) {	//data.ergAr[3] ist voll, Stopbit hat begonnen
+			if (bitB == 4) {				//data.ergAr[3] ist voll, Stopbit hat begonnen
 				maske = 1;
 				bitA = 0;
 				bitB = 0;
